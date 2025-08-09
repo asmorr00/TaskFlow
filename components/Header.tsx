@@ -25,7 +25,7 @@ export function Header({ isFocusMode, onToggleFocusMode, viewMode, onViewModeCha
     <>
       <header className="w-full mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
-          TaskFlow
+          Floatier
         </h1>
         
         <div className="flex items-center gap-3 pr-8">

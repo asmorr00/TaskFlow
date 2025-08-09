@@ -45,7 +45,7 @@ const createInitialTasks = (): Task[] => [
 ]
 
 export function TaskGrid() {
-  const [tasks, setTasks] = useLocalStorage<Task[]>('taskflow-tasks', createInitialTasks())
+  const [tasks, setTasks] = useLocalStorage<Task[]>('floatier-tasks', createInitialTasks())
   const [filters, setFilters] = useState<FilterOptions>({ priority: 'all', status: 'all', searchTerm: '' })
   const [sortBy, setSortBy] = useState<SortOption>('created')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
