@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { CheckCircle, Eye, Grid3X3, Zap, Users, Shield, ArrowRight } from 'lucide-react'
 import { Button } from './ui/button'
 
