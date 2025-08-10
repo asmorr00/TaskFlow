@@ -1,4 +1,4 @@
-'use client'
+
 
 import { useState } from 'react'
 import { Circle, Clock, Eye, CheckCircle, ChevronDown } from 'lucide-react'

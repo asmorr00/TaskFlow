@@ -1,4 +1,4 @@
-'use client'
+
 
 
 import { Circle, Clock, Eye, CheckCircle } from 'lucide-react'

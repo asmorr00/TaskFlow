@@ -1,4 +1,4 @@
-'use client'
+
 
 import { useState } from 'react'
 import { Plus, Focus, Grid3X3, List } from 'lucide-react'

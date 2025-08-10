@@ -1,4 +1,4 @@
-'use client'
+
 
 
 import { Filter, ArrowUpDown, X, Search } from 'lucide-react'

@@ -1,4 +1,4 @@
-'use client'
+
 
 
 import { AlertTriangle, ArrowUp, Minus, ArrowDown } from 'lucide-react'

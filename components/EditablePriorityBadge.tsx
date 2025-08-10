@@ -1,4 +1,4 @@
-'use client'
+
 
 import { useState } from 'react'
 import { AlertTriangle, ArrowUp, Minus, ArrowDown, ChevronDown } from 'lucide-react'
