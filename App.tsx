@@ -6,12 +6,13 @@ import { TaskGrid } from './components/TaskGrid'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { LandingPage } from './components/LandingPage'
 import { AuthPage } from './components/AuthPage'
+import { SettingsPage } from './components/SettingsPage'
 import { AuthProvider, useAuth } from './src/components/AuthProvider'
 
-type AppView = 'landing' | 'auth-signin' | 'auth-signup' | 'app'
+type AppView = 'landing' | 'auth-signin' | 'auth-signup' | 'app' | 'settings'
 
 function AppContent() {
-  const { user, loading } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<AppView>('landing')
 
   if (loading) {
@@ -25,9 +26,21 @@ function AppContent() {
     )
   }
 
-  // If user is authenticated, show main app
+  // If user is authenticated, show appropriate authenticated view
   if (user) {
-    return <TaskGrid />
+    if (currentView === 'settings') {
+      return (
+        <SettingsPage
+          onBackToApp={() => setCurrentView('app')}
+          onSignOut={async () => {
+            await signOut()
+            setCurrentView('landing')
+          }}
+        />
+      )
+    }
+    
+    return <TaskGrid onOpenSettings={() => setCurrentView('settings')} />
   }
 
   // User is not authenticated, show appropriate view

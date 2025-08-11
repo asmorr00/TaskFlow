@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle, Eye, Grid3X3, Zap, Users, Shield, ArrowRight } from 'lucide-react'
+import { CheckCircle, Eye, Grid3X3, Zap, ArrowRight } from 'lucide-react'
 import { Button } from './ui/button'
 
 interface LandingPageProps {
@@ -21,24 +21,9 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       description: "Eliminate distractions with focus mode. Highlight specific tasks and blur out the rest for better concentration."
     },
     {
-      icon: <CheckCircle className="w-6 h-6" />,
-      title: "Smart Subtasks",
-      description: "Break down complex tasks with interactive subtasks. Batch operations and progress tracking included."
-    },
-    {
       icon: <Zap className="w-6 h-6" />,
       title: "Drag & Drop",
       description: "Intuitive drag-and-drop reordering. Organize your tasks exactly how you want them with smooth animations."
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: "Priority & Status",
-      description: "Linear-style priority indicators and status badges. Inline editing makes updates quick and effortless."
-    },
-    {
-      icon: <Shield className="w-6 h-6" />,
-      title: "Dark Mode",
-      description: "Beautiful dark mode with system preference detection. Easy on the eyes during long work sessions."
     }
   ]
 
@@ -82,9 +67,11 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             <br />
             <span className="text-blue-600 dark:text-blue-400">and life, finally.</span>
           </h1>
+          {/*
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-2xl mx-auto">
             Become focused, organized, and calm with Floatier. The world's #1 task manager and to-do list app for getting things done.
           </p>
+          }
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Button
               onClick={onGetStarted}
@@ -103,6 +90,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
               Sign In
             </Button>
           </div>
+          */}
         </div>
       </section>
 
@@ -164,7 +152,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             Ready to get organized?
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-            Join millions of people who organize work and life with Floatier.
+            Join today to organize work and life with Floatier.
           </p>
           <Button
             onClick={onGetStarted}

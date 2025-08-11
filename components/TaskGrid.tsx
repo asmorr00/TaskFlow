@@ -14,7 +14,11 @@ import { useTasks } from '../src/hooks/useTasks'
 import { Alert, AlertDescription } from './ui/alert'
 import { Loader2 } from 'lucide-react'
 
-export function TaskGrid() {
+interface TaskGridProps {
+  onOpenSettings?: () => void
+}
+
+export function TaskGrid({ onOpenSettings }: TaskGridProps = {}) {
     const {
     tasks,
     loading, 
@@ -341,6 +345,7 @@ export function TaskGrid() {
               viewMode={viewMode}
               onViewModeChange={handleViewModeChange}
               onOpenCreateDialog={() => setIsCreateDialogOpen(true)}
+              onOpenSettings={onOpenSettings || (() => {})}
             />
 
           {/* Filter Toolbar */}
