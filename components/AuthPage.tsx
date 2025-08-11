@@ -6,14 +6,14 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
+import { supabase } from '../lib/supabase'
 
 interface AuthPageProps {
-  onAuthSuccess: () => void
   onBackToLanding: () => void
   initialMode?: 'signin' | 'signup'
 }
 
-export function AuthPage({ onAuthSuccess, onBackToLanding, initialMode = 'signin' }: AuthPageProps) {
+export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPageProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -23,20 +23,83 @@ export function AuthPage({ onAuthSuccess, onBackToLanding, initialMode = 'signin
     confirmPassword: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    setIsLoading(false)
-    onAuthSuccess()
+    setError(null)
+
+    try {
+      if (mode === 'signup') {
+        // Validate password confirmation
+        if (formData.password !== formData.confirmPassword) {
+          throw new Error('Passwords do not match')
+        }
+
+        // Sign up with Supabase
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.name
+            }
+          }
+        })
+
+        if (error) {
+          throw error
+        }
+
+        // Note: After signup, the user still needs to verify their email
+        // For now, we'll proceed to the app, but in production you might want to show a verification message
+      } else {
+        // Sign in with Supabase
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password
+        })
+
+        if (error) {
+          throw error
+        }
+      }
+
+      // Auth success is handled by the AuthProvider's onAuthStateChange
+      // No need to call onAuthSuccess() here as the auth state change will trigger app re-render
+    } catch (error: any) {
+      console.error('Auth error:', error)
+      setError(error.message || 'An error occurred during authentication')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleGoogleAuth = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      })
+
+      if (error) {
+        throw error
+      }
+    } catch (error: any) {
+      console.error('Google auth error:', error)
+      setError(error.message || 'Failed to sign in with Google')
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -83,6 +146,11 @@ export function AuthPage({ onAuthSuccess, onBackToLanding, initialMode = 'signin
 
         {/* Auth Card */}
         <div className="bg-white dark:bg-[#1E1E1E] rounded-lg border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div className="space-y-2">
@@ -210,6 +278,8 @@ export function AuthPage({ onAuthSuccess, onBackToLanding, initialMode = 'signin
               <Button
                 variant="outline"
                 type="button"
+                onClick={handleGoogleAuth}
+                disabled={isLoading}
                 className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -235,7 +305,8 @@ export function AuthPage({ onAuthSuccess, onBackToLanding, initialMode = 'signin
               <Button
                 variant="outline"
                 type="button"
-                className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                disabled={true}
+                className="border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed"
               >
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.663-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>

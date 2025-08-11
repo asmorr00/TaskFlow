@@ -1,13 +1,18 @@
 
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { ThemeProvider } from './components/ThemeProvider'
 import { TaskGrid } from './components/TaskGrid'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { LandingPage } from './components/LandingPage'
+import { AuthPage } from './components/AuthPage'
 import { AuthProvider, useAuth } from './src/components/AuthProvider'
-import { LoginForm } from './src/components/LoginForm'
+
+type AppView = 'landing' | 'auth-signin' | 'auth-signup' | 'app'
 
 function AppContent() {
   const { user, loading } = useAuth()
+  const [currentView, setCurrentView] = useState<AppView>('landing')
 
   if (loading) {
     return (
@@ -20,12 +25,45 @@ function AppContent() {
     )
   }
 
-  if (!user) {
-    return <LoginForm />
+  // If user is authenticated, show main app
+  if (user) {
+    return <TaskGrid />
   }
 
-  // User is authenticated, show main app
-  return <TaskGrid />
+  // User is not authenticated, show appropriate view
+  switch (currentView) {
+    case 'landing':
+      return (
+        <LandingPage
+          onGetStarted={() => setCurrentView('auth-signup')}
+          onSignIn={() => setCurrentView('auth-signin')}
+        />
+      )
+    
+    case 'auth-signin':
+      return (
+        <AuthPage
+          onBackToLanding={() => setCurrentView('landing')}
+          initialMode="signin"
+        />
+      )
+    
+    case 'auth-signup':
+      return (
+        <AuthPage
+          onBackToLanding={() => setCurrentView('landing')}
+          initialMode="signup"
+        />
+      )
+    
+    default:
+      return (
+        <LandingPage
+          onGetStarted={() => setCurrentView('auth-signup')}
+          onSignIn={() => setCurrentView('auth-signin')}
+        />
+      )
+  }
 }
 
 export default function App() {
