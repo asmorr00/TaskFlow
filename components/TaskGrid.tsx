@@ -9,43 +9,28 @@ import { Footer } from './Footer'
 import { CreateTaskDialog } from './CreateTaskDialog'
 import { EditTaskDialog } from './EditTaskDialog'
 import type { Task, FilterOptions, SortOption, Priority, Status, ViewMode } from '@/types/task'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
-
-const createInitialTasks = (): Task[] => [
-  {
-    id: '1',
-    title: 'Website Redesign',
-    description: 'Complete the new website design and development',
-    priority: 'high',
-    status: 'in-progress',
-    isFocused: true,
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    subtasks: [
-      { id: '1.1', name: 'Create wireframes', description: 'Design initial page layouts and user flows', completed: false },
-      { id: '1.2', name: 'Develop components', description: 'Build reusable UI components', completed: false },
-      { id: '1.3', name: 'Testing & QA', description: 'Perform comprehensive testing', completed: false }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Mobile App',
-    description: 'Develop cross-platform mobile application',
-    priority: 'urgent',
-    status: 'in-progress',
-    isFocused: true,
-    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    subtasks: [
-      { id: '2.1', name: 'Setup project', description: 'Initialize React Native project', completed: true },
-      { id: '2.2', name: 'User authentication', description: 'Implement login and registration', completed: false },
-      { id: '2.3', name: 'Push notifications', description: 'Add push notification support', completed: false }
-    ]
-  }
-]
+import type { TaskInsert } from '@/src/types/database'
+import { useTasks } from '../src/hooks/useTasks'
+import { Alert, AlertDescription } from './ui/alert'
+import { Loader2 } from 'lucide-react'
 
 export function TaskGrid() {
-  const [tasks, setTasks] = useLocalStorage<Task[]>('floatier-tasks', createInitialTasks())
+  const { 
+    tasks, 
+    loading, 
+    error, 
+    createTask, 
+    updateTask, 
+    deleteTask, 
+    duplicateTask, 
+    updateTaskPriority, 
+    updateTaskStatus, 
+    updateTaskFocus,
+    updateTaskPositions,
+    toggleSubtask, 
+    batchUpdateSubtasks,
+    createSubtask
+  } = useTasks()
   const [filters, setFilters] = useState<FilterOptions>({ priority: 'all', status: 'all', searchTerm: '' })
   const [sortBy, setSortBy] = useState<SortOption>('created')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
@@ -60,7 +45,7 @@ export function TaskGrid() {
       const statusMatch = filters.status === 'all' || task.status === filters.status
       const searchMatch = !filters.searchTerm || 
         task.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-        task.description.toLowerCase().includes(filters.searchTerm.toLowerCase())
+        task.description?.toLowerCase().includes(filters.searchTerm.toLowerCase())
       return priorityMatch && statusMatch && searchMatch
     })
 
@@ -78,7 +63,7 @@ export function TaskGrid() {
           case 'title':
             return a.title.localeCompare(b.title)
           case 'updated':
-            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
           default:
             return 0
         }
@@ -116,110 +101,81 @@ export function TaskGrid() {
     setViewMode(mode)
   }
 
-  const toggleSubtask = (taskId: string, subtaskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? {
-              ...task,
-              updatedAt: new Date(),
-              subtasks: task.subtasks.map(subtask =>
-                subtask.id === subtaskId
-                  ? { ...subtask, completed: !subtask.completed }
-                  : subtask
-              )
-            }
-          : task
-      )
-    )
-  }
-
-  const createTask = (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newTask: Task = {
-      ...newTaskData,
-      id: Date.now().toString(),
-      isFocused: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      subtasks: newTaskData.subtasks.map((subtask, index) => ({
-        ...subtask,
-        id: `${Date.now()}-${index}`
-      }))
+  // Async wrapper functions with error handling
+  const handleToggleSubtask = async (taskId: string, subtaskId: string) => {
+    try {
+      await toggleSubtask(taskId, subtaskId)
+    } catch (error) {
+      console.error('Failed to toggle subtask:', error)
     }
-    setTasks(prevTasks => [...prevTasks, newTask])
   }
 
-  const updateTask = (taskId: string, updatedTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId 
-          ? { 
-              ...task,
-              ...updatedTaskData, 
-              id: taskId,
-              updatedAt: new Date()
-            }
-          : task
-      )
-    )
-  }
-
-  const deleteTask = (taskId: string) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId))
-  }
-
-  const duplicateTask = (originalTask: Task) => {
-    const duplicatedTask: Task = {
-      ...originalTask,
-      id: Date.now().toString(),
-      title: `Copy of ${originalTask.title}`,
-      status: 'todo',
-      isFocused: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      subtasks: originalTask.subtasks.map((subtask, index) => ({
-        ...subtask,
-        id: `${Date.now()}-${index}`,
-        completed: false
-      }))
+  const handleCreateTask = async (newTaskData: Omit<TaskInsert, 'user_id' | 'created_at' | 'updated_at'>, subtasks?: { name: string; description: string }[]) => {
+    try {
+      const createdTask = await createTask(newTaskData)
+      
+      // If there are subtasks to create, add them to the new task
+      if (subtasks && subtasks.length > 0) {
+        for (const subtask of subtasks) {
+          await createSubtask(createdTask.id, subtask)
+        }
+      }
+      
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Failed to create task:', error)
     }
-    
-    const originalIndex = tasks.findIndex(task => task.id === originalTask.id)
-    setTasks(prevTasks => {
-      const newTasks = [...prevTasks]
-      newTasks.splice(originalIndex + 1, 0, duplicatedTask)
-      return newTasks
-    })
   }
 
-  const updateTaskPriority = (taskId: string, priority: Priority) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, priority, updatedAt: new Date() } : task
-      )
-    )
+  const handleUpdateTask = async (taskId: string, updatedTaskData: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      // Remove subtasks from the update data as they are handled separately
+      const { subtasks, ...taskUpdateData } = updatedTaskData
+      await updateTask(taskId, taskUpdateData)
+      setEditingTask(null)
+    } catch (error) {
+      console.error('Failed to update task:', error)
+    }
   }
 
-  const updateTaskStatus = (taskId: string, status: Status) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, status, updatedAt: new Date() } : task
-      )
-    )
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask(taskId)
+    } catch (error) {
+      console.error('Failed to delete task:', error)
+    }
   }
 
-  const batchUpdateSubtasks = (taskId: string, completed: boolean) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? {
-              ...task,
-              updatedAt: new Date(),
-              subtasks: task.subtasks.map(subtask => ({ ...subtask, completed }))
-            }
-          : task
-      )
-    )
+  const handleDuplicateTask = async (originalTask: Task) => {
+    try {
+      await duplicateTask(originalTask)
+    } catch (error) {
+      console.error('Failed to duplicate task:', error)
+    }
+  }
+
+  const handleUpdateTaskPriority = async (taskId: string, priority: Priority) => {
+    try {
+      await updateTaskPriority(taskId, priority)
+    } catch (error) {
+      console.error('Failed to update task priority:', error)
+    }
+  }
+
+  const handleUpdateTaskStatus = async (taskId: string, status: Status) => {
+    try {
+      await updateTaskStatus(taskId, status)
+    } catch (error) {
+      console.error('Failed to update task status:', error)
+    }
+  }
+
+  const handleBatchUpdateSubtasks = async (taskId: string, completed: boolean) => {
+    try {
+      await batchUpdateSubtasks(taskId, completed)
+    } catch (error) {
+      console.error('Failed to update subtasks:', error)
+    }
   }
 
   const handleDragStart = (e: React.DragEvent, task: Task) => {
@@ -234,79 +190,102 @@ export function TaskGrid() {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDrop = (e: React.DragEvent, targetTask: Task) => {
+  const handleDrop = async (e: React.DragEvent, targetTask: Task) => {
     e.preventDefault()
     e.stopPropagation()
     
-    console.log('Drop event triggered')
-    console.log('Dragged task:', draggedTask?.title)
-    console.log('Target task:', targetTask.title)
-    
     if (!draggedTask || draggedTask.id === targetTask.id) {
-      console.log('No valid drag operation')
       setDraggedTask(null)
       return
     }
 
-    // Work with the original tasks array
-    const newTasks = [...tasks]
-    const draggedIndex = newTasks.findIndex(task => task.id === draggedTask.id)
-    const targetIndex = newTasks.findIndex(task => task.id === targetTask.id)
+    try {
+      // Work with the original tasks array
+      const newTasks = [...tasks]
+      const draggedIndex = newTasks.findIndex(task => task.id === draggedTask.id)
+      const targetIndex = newTasks.findIndex(task => task.id === targetTask.id)
 
-    console.log('Dragged index:', draggedIndex, 'Target index:', targetIndex)
+      if (draggedIndex === -1 || targetIndex === -1) {
+        setDraggedTask(null)
+        return
+      }
 
-    if (draggedIndex === -1 || targetIndex === -1) {
-      console.log('Invalid indices')
+      // Remove dragged task and insert at target position
+      const [movedTask] = newTasks.splice(draggedIndex, 1)
+      newTasks.splice(targetIndex, 0, movedTask)
+
+      // Calculate new positions for all affected tasks
+      const positionUpdates = newTasks.map((task, index) => ({
+        id: task.id,
+        position: index + 1
+      }))
+
+      // Update positions in database and local state
+      await updateTaskPositions(positionUpdates)
+      
       setDraggedTask(null)
-      return
+    } catch (error) {
+      console.error('Failed to update task positions:', error)
+      setDraggedTask(null)
     }
-
-    // Remove dragged task and insert at target position
-    const [movedTask] = newTasks.splice(draggedIndex, 1)
-    newTasks.splice(targetIndex, 0, movedTask)
-
-    console.log('Updating tasks order')
-    setTasks(newTasks)
-    setDraggedTask(null)
   }
 
   const handleDragEnd = () => {
-    console.log('Drag ended')
     setDraggedTask(null)
   }
 
-  const toggleTaskFocus = (taskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, isFocused: !task.isFocused, updatedAt: new Date() } : task
-      )
-    )
-  }
+  // Note: focus toggle is now handled directly via updateTaskFocus in TaskTile
 
   const toggleFocusMode = () => {
     setIsFocusMode(!isFocusMode)
   }
 
-  const clearAllFocus = () => {
-    setTasks(prevTasks =>
-      prevTasks.map(task => ({ ...task, isFocused: true }))
-    )
-    setIsFocusMode(false)
+  const clearAllFocus = async () => {
+    try {
+      // Update all tasks to be focused
+      await Promise.all(
+        tasks.map(task => updateTaskFocus(task.id, true))
+      )
+      setIsFocusMode(false)
+    } catch (error) {
+      console.error('Failed to clear focus:', error)
+    }
   }
 
-  const focusedTaskCount = tasks.filter(task => task.isFocused).length
+  const focusedTaskCount = tasks.filter(task => task.is_focused).length
   const hasFocusedTasks = isFocusMode && focusedTaskCount < tasks.length
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-[#F9FAFB] dark:bg-[#0A0A0A] font-[Inter,system-ui,sans-serif] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-[#4f46e5]" />
+          <p className="text-slate-600 dark:text-slate-400">Loading your tasks...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F9FAFB] dark:bg-[#0A0A0A] font-[Inter,system-ui,sans-serif]">
         <div className="flex-1 p-6 overflow-visible pb-20">
           <div className="w-full max-w-[1400px] mx-auto overflow-visible">
+            {/* Error Display */}
+            {error && (
+              <Alert className="mb-4 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+                <AlertDescription className="text-red-800 dark:text-red-200">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
             {/* Header */}
             <Header 
               isFocusMode={isFocusMode}
               onToggleFocusMode={toggleFocusMode}
               viewMode={viewMode}
               onViewModeChange={handleViewModeChange}
+              onOpenCreateDialog={() => setIsCreateDialogOpen(true)}
             />
 
           {/* Filter Toolbar */}
@@ -368,15 +347,15 @@ export function TaskGrid() {
                     task={task}
                     taskNumber={index + 1}
                     viewMode={viewMode}
-                    onToggleSubtask={toggleSubtask}
-                    onUpdatePriority={updateTaskPriority}
-                    onUpdateStatus={updateTaskStatus}
+                    onToggleSubtask={handleToggleSubtask}
+                    onUpdatePriority={handleUpdateTaskPriority}
+                    onUpdateStatus={handleUpdateTaskStatus}
                     onEditTask={() => setEditingTask(task)}
-                    onDeleteTask={deleteTask}
-                    onDuplicateTask={duplicateTask}
+                    onDeleteTask={handleDeleteTask}
+                    onDuplicateTask={handleDuplicateTask}
 
-                    onBatchUpdateSubtasks={batchUpdateSubtasks}
-                    onToggleFocus={toggleTaskFocus}
+                    onBatchUpdateSubtasks={handleBatchUpdateSubtasks}
+                    onToggleFocus={(taskId: string) => updateTaskFocus(taskId, !task.is_focused)}
                     onDragStart={handleDragStart}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
@@ -416,7 +395,7 @@ export function TaskGrid() {
       <CreateTaskDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        onCreateTask={createTask}
+        onCreateTask={handleCreateTask}
       />
 
       {/* Edit Task Dialog */}
@@ -424,10 +403,7 @@ export function TaskGrid() {
         task={editingTask}
         open={!!editingTask}
         onOpenChange={(open) => !open && setEditingTask(null)}
-        onUpdateTask={(task) => {
-          updateTask(task.id, task)
-          setEditingTask(null)
-        }}
+        onUpdateTask={(updatedTask) => handleUpdateTask(updatedTask.id, updatedTask)}
       />
     </div>
   )

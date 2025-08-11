@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, X } from 'lucide-react'
-import type { Task, Priority, Status, Subtask } from '@/types/task'
+import type { Priority, Status } from '@/types/task'
+import type { TaskInsert } from '@/src/types/database'
 
 interface CreateTaskDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void
+  onCreateTask: (task: Omit<TaskInsert, 'user_id' | 'created_at' | 'updated_at'>, subtasks?: { name: string; description: string }[]) => void
 }
 
 export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTaskDialogProps) {
@@ -19,31 +20,40 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
   const [status, setStatus] = useState<Status>('todo')
-  const [subtasks, setSubtasks] = useState<Omit<Subtask, 'id'>[]>([])
+  const [subtasks, setSubtasks] = useState<{ name: string; description: string }[]>([])
   const [newSubtaskName, setNewSubtaskName] = useState('')
   const [newSubtaskDescription, setNewSubtaskDescription] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim()) return
 
-    onCreateTask({
-      title: title.trim(),
-      description: description.trim(),
-      priority,
-      status,
-      subtasks: subtasks as Subtask[],
-      isFocused: true
-    })
+    try {
+      setIsCreating(true)
+      
+      onCreateTask({
+        title: title.trim(),
+        description: description.trim(),
+        priority,
+        status,
+        is_focused: true
+        // position will be auto-calculated by DatabaseService
+      }, subtasks)
 
-    // Reset form
-    setTitle('')
-    setDescription('')
-    setPriority('medium')
-    setStatus('todo')
-    setSubtasks([])
-    setNewSubtaskName('')
-    setNewSubtaskDescription('')
-    onOpenChange(false)
+      // Reset form
+      setTitle('')
+      setDescription('')
+      setPriority('medium')
+      setStatus('todo')
+      setSubtasks([])
+      setNewSubtaskName('')
+      setNewSubtaskDescription('')
+      onOpenChange(false)
+    } catch (error) {
+      console.error('Failed to create task:', error)
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   const addSubtask = () => {
@@ -51,8 +61,7 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
 
     setSubtasks([...subtasks, {
       name: newSubtaskName.trim(),
-      description: newSubtaskDescription.trim(),
-      completed: false
+      description: newSubtaskDescription.trim()
     }])
     setNewSubtaskName('')
     setNewSubtaskDescription('')
@@ -67,7 +76,9 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
         <DialogHeader>
           <DialogTitle className="text-slate-900 dark:text-slate-100">Create New Task</DialogTitle>
-          {/* Close button styling will be handled by the Dialog component */}
+          <DialogDescription>
+            Create a new task with details, priority, status, and optional subtasks.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -196,10 +207,10 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
           </Button>
           <Button 
             onClick={handleCreate} 
-            disabled={!title.trim()}
+            disabled={!title.trim() || isCreating}
             className="bg-blue-600 dark:bg-blue-600 text-white hover:bg-blue-700 dark:hover:bg-blue-700"
           >
-            Create Task
+            {isCreating ? 'Creating...' : 'Create Task'}
           </Button>
         </DialogFooter>
       </DialogContent>

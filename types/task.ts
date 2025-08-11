@@ -1,20 +1,25 @@
 export interface Subtask {
   id: string
+  task_id: string
   name: string
-  description: string
+  description: string | null
   completed: boolean
+  position: number
+  created_at: string
 }
 
 export interface Task {
   id: string
+  user_id: string
   title: string
-  description: string
-  priority: 'urgent' | 'high' | 'medium' | 'low'
+  description: string | null
+  priority: 'low' | 'medium' | 'high' | 'urgent'
   status: 'todo' | 'in-progress' | 'review' | 'done'
   subtasks: Subtask[]
-  isFocused: boolean
-  createdAt: Date
-  updatedAt: Date
+  is_focused: boolean
+  position: number
+  created_at: string
+  updated_at: string
 }
 
 export type Priority = Task['priority']

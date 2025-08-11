@@ -111,7 +111,7 @@ export function TaskTile({
     onToggleFocus(task.id)
   }
 
-  const isBlurred = hasFocusedTasks && !task.isFocused
+  const isBlurred = hasFocusedTasks && !task.is_focused
   const showFocusButton = true // Always show focus button for better UX
 
   // Get container classes based on view mode
@@ -124,7 +124,7 @@ export function TaskTile({
       ${isDragging ? 'rotate-1 scale-105 shadow-lg ring-2 ring-blue-500/20 z-[1000] opacity-95' : ''}
       ${isDragOver ? 'ring-2 ring-blue-500/40 bg-blue-50/50 dark:bg-blue-900/10 border-blue-400/60' : ''}
       ${isBlurred ? 'blur-sm opacity-40' : ''}
-      ${task.isFocused && hasFocusedTasks ? 'ring-1 ring-blue-500/30 shadow-lg' : ''}
+      ${task.is_focused && hasFocusedTasks ? 'ring-1 ring-blue-500/30 shadow-lg' : ''}
       ${subtasksExpanded && task.subtasks.length > 3 ? 'z-20' : 'z-10'}
     `
     
@@ -184,19 +184,12 @@ export function TaskTile({
             e.preventDefault()
             return
           }
-          console.log('TaskTile drag start:', task.title)
           onDragStart(e, task)
         }}
-        onDragOver={(e) => {
-          console.log('TaskTile drag over:', task.title)
-          onDragOver(e)
-        }}
+        onDragOver={onDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        onDrop={(e) => {
-          console.log('TaskTile drop on:', task.title)
-          handleDrop(e)
-        }}
+        onDrop={handleDrop}
         onDragEnd={onDragEnd}
         onClick={isBlurred ? handleFocusToggle : undefined}
         className={getContainerClasses()}
@@ -244,14 +237,14 @@ export function TaskTile({
               hover:bg-slate-100 dark:hover:bg-slate-800
               max-[768px]:bottom-4 max-[768px]:right-4
               max-[480px]:bottom-3 max-[480px]:right-3
-              ${task.isFocused 
+              ${task.is_focused 
                 ? 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300' 
                 : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
               }
             `}
-            title={task.isFocused ? "Remove from focus" : "Add to focus"}
+            title={task.is_focused ? "Remove from focus" : "Add to focus"}
           >
-            {task.isFocused ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            {task.is_focused ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
           </button>
         )}
 

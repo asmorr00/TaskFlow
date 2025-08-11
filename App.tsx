@@ -1,68 +1,40 @@
 
-import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { ThemeProvider } from './components/ThemeProvider'
 import { TaskGrid } from './components/TaskGrid'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { LandingPage } from './components/LandingPage'
-import { AuthPage } from './components/AuthPage'
+import { AuthProvider, useAuth } from './src/components/AuthProvider'
+import { LoginForm } from './src/components/LoginForm'
 
-type AppView = 'landing' | 'auth' | 'app'
+function AppContent() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#0A0A0A] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-[#4f46e5]" />
+          <p className="text-slate-600 dark:text-slate-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <LoginForm />
+  }
+
+  // User is authenticated, show main app
+  return <TaskGrid />
+}
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<AppView>('landing')
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
-
-  const handleGetStarted = () => {
-    setAuthMode('signup')
-    setCurrentView('auth')
-  }
-
-  const handleSignIn = () => {
-    setAuthMode('signin')
-    setCurrentView('auth')
-  }
-
-  const handleAuthSuccess = () => {
-    setCurrentView('app')
-  }
-
-  const handleBackToLanding = () => {
-    setCurrentView('landing')
-  }
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'landing':
-        return (
-          <LandingPage 
-            onGetStarted={handleGetStarted}
-            onSignIn={handleSignIn}
-          />
-        )
-      case 'auth':
-        return (
-          <AuthPage
-            onAuthSuccess={handleAuthSuccess}
-            onBackToLanding={handleBackToLanding}
-            initialMode={authMode}
-          />
-        )
-      case 'app':
-        return <TaskGrid />
-      default:
-        return (
-          <LandingPage 
-            onGetStarted={handleGetStarted}
-            onSignIn={handleSignIn}
-          />
-        )
-    }
-  }
-
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        {renderCurrentView()}
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   )

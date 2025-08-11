@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, X } from 'lucide-react'
-import type { Task, Priority, Status, Subtask } from '@/types/task'
+import type { Task, Priority, Status } from '@/types/task'
+import { useTasks } from '@/src/hooks/useTasks'
 
 interface EditTaskDialogProps {
   task: Task | null
@@ -16,21 +17,21 @@ interface EditTaskDialogProps {
 }
 
 export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditTaskDialogProps) {
+  const { createSubtask, updateSubtask, deleteSubtask } = useTasks()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
   const [status, setStatus] = useState<Status>('todo')
-  const [subtasks, setSubtasks] = useState<Subtask[]>([])
   const [newSubtaskName, setNewSubtaskName] = useState('')
   const [newSubtaskDescription, setNewSubtaskDescription] = useState('')
+  const [isAddingSubtask, setIsAddingSubtask] = useState(false)
 
   useEffect(() => {
     if (task) {
       setTitle(task.title)
-      setDescription(task.description)
+      setDescription(task.description || '')
       setPriority(task.priority)
       setStatus(task.status)
-      setSubtasks(task.subtasks)
     }
   }, [task])
 
@@ -43,8 +44,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
       description: description.trim(),
       priority,
       status,
-      subtasks,
-      updatedAt: new Date()
+      updated_at: new Date().toISOString()
     })
 
     // Reset form
@@ -53,29 +53,42 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
     onOpenChange(false)
   }
 
-  const addSubtask = () => {
-    if (!newSubtaskName.trim()) return
+  const addSubtask = async () => {
+    if (!newSubtaskName.trim() || !task) return
 
-    const newSubtask: Subtask = {
-      id: `${Date.now()}`,
-      name: newSubtaskName.trim(),
-      description: newSubtaskDescription.trim(),
-      completed: false
+    try {
+      setIsAddingSubtask(true)
+      await createSubtask(task.id, {
+        name: newSubtaskName.trim(),
+        description: newSubtaskDescription.trim() || undefined
+      })
+      setNewSubtaskName('')
+      setNewSubtaskDescription('')
+    } catch (error) {
+      console.error('Failed to add subtask:', error)
+    } finally {
+      setIsAddingSubtask(false)
     }
-
-    setSubtasks([...subtasks, newSubtask])
-    setNewSubtaskName('')
-    setNewSubtaskDescription('')
   }
 
-  const updateSubtask = (index: number, updates: Partial<Subtask>) => {
-    setSubtasks(subtasks.map((subtask, i) => 
-      i === index ? { ...subtask, ...updates } : subtask
-    ))
+  const handleUpdateSubtask = async (subtaskId: string, updates: { name?: string; description?: string }) => {
+    if (!task) return
+
+    try {
+      await updateSubtask(task.id, subtaskId, updates)
+    } catch (error) {
+      console.error('Failed to update subtask:', error)
+    }
   }
 
-  const removeSubtask = (index: number) => {
-    setSubtasks(subtasks.filter((_, i) => i !== index))
+  const handleRemoveSubtask = async (subtaskId: string) => {
+    if (!task) return
+
+    try {
+      await deleteSubtask(task.id, subtaskId)
+    } catch (error) {
+      console.error('Failed to delete subtask:', error)
+    }
   }
 
   if (!task) return null
@@ -85,6 +98,9 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>
+            Update your task details, priority, status, and manage subtasks.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -150,19 +166,19 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
             <Label>Subtasks</Label>
             
             {/* Existing subtasks */}
-            {subtasks.length > 0 && (
+            {task.subtasks.length > 0 && (
               <div className="space-y-2 mb-4">
-                {subtasks.map((subtask, index) => (
+                {task.subtasks.map((subtask) => (
                   <div key={subtask.id} className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex-1 space-y-1">
                       <Input
                         value={subtask.name}
-                        onChange={(e) => updateSubtask(index, { name: e.target.value })}
+                        onChange={(e) => handleUpdateSubtask(subtask.id, { name: e.target.value })}
                         className="font-medium text-sm"
                       />
                       <Textarea
-                        value={subtask.description}
-                        onChange={(e) => updateSubtask(index, { description: e.target.value })}
+                        value={subtask.description || ''}
+                        onChange={(e) => handleUpdateSubtask(subtask.id, { description: e.target.value })}
                         placeholder="Description (optional)"
                         className="text-xs min-h-[50px]"
                       />
@@ -170,7 +186,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeSubtask(index)}
+                      onClick={() => handleRemoveSubtask(subtask.id)}
                       className="h-8 w-8 p-0"
                     >
                       <X className="h-4 w-4" />
@@ -199,11 +215,11 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
                 variant="secondary"
                 size="sm"
                 onClick={addSubtask}
-                disabled={!newSubtaskName.trim()}
+                disabled={!newSubtaskName.trim() || isAddingSubtask}
                 className="w-full"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Subtask
+                {isAddingSubtask ? 'Adding...' : 'Add Subtask'}
               </Button>
             </div>
           </div>
