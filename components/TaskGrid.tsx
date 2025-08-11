@@ -15,8 +15,8 @@ import { Alert, AlertDescription } from './ui/alert'
 import { Loader2 } from 'lucide-react'
 
 export function TaskGrid() {
-  const { 
-    tasks, 
+    const {
+    tasks,
     loading, 
     error, 
     createTask, 
@@ -29,15 +29,22 @@ export function TaskGrid() {
     updateTaskPositions,
     toggleSubtask, 
     batchUpdateSubtasks,
-    createSubtask
+    createSubtask,
+    updateSubtask,
+    deleteSubtask
   } = useTasks()
   const [filters, setFilters] = useState<FilterOptions>({ priority: 'all', status: 'all', searchTerm: '' })
   const [sortBy, setSortBy] = useState<SortOption>('created')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [isFocusMode, setIsFocusMode] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [draggedTask, setDraggedTask] = useState<Task | null>(null)
+
+  // Get the current editing task from the tasks array to ensure it's always up-to-date
+  const editingTask = editingTaskId ? tasks.find(task => task.id === editingTaskId) || null : null
+
+
 
   const filteredAndSortedTasks = useMemo(() => {
     let filteredTasks = tasks.filter(task => {
@@ -129,10 +136,58 @@ export function TaskGrid() {
 
   const handleUpdateTask = async (taskId: string, updatedTaskData: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Remove subtasks from the update data as they are handled separately
       const { subtasks, ...taskUpdateData } = updatedTaskData
+
+      // Update the task fields first
       await updateTask(taskId, taskUpdateData)
-      setEditingTask(null)
+
+      // Handle subtask changes - we need to compare with current subtasks and apply changes
+      const currentTask = tasks.find(t => t.id === taskId)
+      if (currentTask && subtasks) {
+        const currentSubtasks = currentTask.subtasks
+        const newSubtasks = subtasks
+
+        // Find subtasks to delete (exist in current but not in new)
+        const subtasksToDelete = currentSubtasks.filter(
+          current => !newSubtasks.find(newSub => newSub.id === current.id)
+        )
+
+        // Find subtasks to update (exist in both but content changed)
+        const subtasksToUpdate = newSubtasks.filter(newSub => {
+          const currentSub = currentSubtasks.find(current => current.id === newSub.id)
+          return currentSub && (
+            currentSub.name !== newSub.name || 
+            currentSub.description !== newSub.description
+          )
+        })
+
+        // Find subtasks to create (exist in new but not in current)
+        const subtasksToCreate = newSubtasks.filter(newSub => !newSub.id)
+
+        // Execute all operations
+        await Promise.all([
+          // Delete removed subtasks
+          ...subtasksToDelete.map(subtask => deleteSubtask(taskId, subtask.id)),
+          
+          // Update modified subtasks
+          ...subtasksToUpdate.map(subtask => 
+            updateSubtask(taskId, subtask.id!, {
+              name: subtask.name,
+              description: subtask.description || undefined
+            })
+          ),
+          
+          // Create new subtasks
+          ...subtasksToCreate.map(subtask =>
+            createSubtask(taskId, {
+              name: subtask.name,
+              description: subtask.description || undefined
+            })
+          )
+        ])
+      }
+
+      setEditingTaskId(null)
     } catch (error) {
       console.error('Failed to update task:', error)
     }
@@ -350,7 +405,7 @@ export function TaskGrid() {
                     onToggleSubtask={handleToggleSubtask}
                     onUpdatePriority={handleUpdateTaskPriority}
                     onUpdateStatus={handleUpdateTaskStatus}
-                    onEditTask={() => setEditingTask(task)}
+                    onEditTask={() => setEditingTaskId(task.id)}
                     onDeleteTask={handleDeleteTask}
                     onDuplicateTask={handleDuplicateTask}
 
@@ -402,8 +457,8 @@ export function TaskGrid() {
       <EditTaskDialog
         task={editingTask}
         open={!!editingTask}
-        onOpenChange={(open) => !open && setEditingTask(null)}
-        onUpdateTask={(updatedTask) => handleUpdateTask(updatedTask.id, updatedTask)}
+        onOpenChange={(open) => !open && setEditingTaskId(null)}
+        onUpdateTask={handleUpdateTask}
       />
     </div>
   )

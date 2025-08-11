@@ -297,8 +297,8 @@ export function useTasks(): UseTasksState & UseTasksActions {
       })
 
       // Update local state
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
+      setTasks(prevTasks => {
+        const updatedTasks = prevTasks.map(task =>
           task.id === taskId
             ? {
                 ...task,
@@ -306,7 +306,9 @@ export function useTasks(): UseTasksState & UseTasksActions {
               }
             : task
         )
-      )
+
+        return updatedTasks
+      })
     } catch (err) {
       console.error('Error creating subtask:', err)
       setError(err instanceof Error ? err.message : 'Failed to create subtask')

@@ -7,24 +7,25 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, X } from 'lucide-react'
 import type { Task, Priority, Status } from '@/types/task'
-import { useTasks } from '@/src/hooks/useTasks'
 
 interface EditTaskDialogProps {
   task: Task | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onUpdateTask: (task: Task) => void
+  onUpdateTask: (taskId: string, updatedTaskData: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => void
 }
 
 export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditTaskDialogProps) {
-  const { createSubtask, updateSubtask, deleteSubtask } = useTasks()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
   const [status, setStatus] = useState<Status>('todo')
   const [newSubtaskName, setNewSubtaskName] = useState('')
   const [newSubtaskDescription, setNewSubtaskDescription] = useState('')
-  const [isAddingSubtask, setIsAddingSubtask] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  
+  // Local state for subtasks (same pattern as CreateTaskDialog)
+  const [localSubtasks, setLocalSubtasks] = useState<{ id?: string; name: string; description: string; completed?: boolean; position?: number }[]>([])
 
   useEffect(() => {
     if (task) {
@@ -32,66 +33,84 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
       setDescription(task.description || '')
       setPriority(task.priority)
       setStatus(task.status)
+      // Initialize local subtasks from task data
+      setLocalSubtasks(task.subtasks.map(subtask => ({
+        id: subtask.id,
+        name: subtask.name,
+        description: subtask.description || '',
+        completed: subtask.completed,
+        position: subtask.position
+      })))
     }
   }, [task])
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!task || !title.trim()) return
 
-    onUpdateTask({
-      ...task,
-      title: title.trim(),
-      description: description.trim(),
-      priority,
-      status,
-      updated_at: new Date().toISOString()
-    })
-
-    // Reset form
-    setNewSubtaskName('')
-    setNewSubtaskDescription('')
-    onOpenChange(false)
-  }
-
-  const addSubtask = async () => {
-    if (!newSubtaskName.trim() || !task) return
-
     try {
-      setIsAddingSubtask(true)
-      await createSubtask(task.id, {
-        name: newSubtaskName.trim(),
-        description: newSubtaskDescription.trim() || undefined
-      })
+      setIsUpdating(true)
+      
+      // Update the task with all local changes including subtasks
+      const taskUpdateData = {
+        ...task,
+        title: title.trim(),
+        description: description.trim(),
+        priority,
+        status,
+        subtasks: localSubtasks.map(subtask => ({
+          id: subtask.id || '',
+          task_id: task.id,
+          name: subtask.name,
+          description: subtask.description || null,
+          completed: subtask.completed || false,
+          position: subtask.position || 0,
+          created_at: ''
+        }))
+      }
+
+      onUpdateTask(task.id, taskUpdateData)
+
+      // Reset form
       setNewSubtaskName('')
       setNewSubtaskDescription('')
+      onOpenChange(false)
     } catch (error) {
-      console.error('Failed to add subtask:', error)
+      console.error('Failed to update task:', error)
     } finally {
-      setIsAddingSubtask(false)
+      setIsUpdating(false)
     }
   }
 
-  const handleUpdateSubtask = async (subtaskId: string, updates: { name?: string; description?: string }) => {
-    if (!task) return
+  const addSubtask = () => {
+    if (!newSubtaskName.trim()) return
 
-    try {
-      await updateSubtask(task.id, subtaskId, updates)
-    } catch (error) {
-      console.error('Failed to update subtask:', error)
-    }
+    setLocalSubtasks([...localSubtasks, {
+      name: newSubtaskName.trim(),
+      description: newSubtaskDescription.trim(),
+      completed: false,
+      position: localSubtasks.length + 1
+    }])
+    setNewSubtaskName('')
+    setNewSubtaskDescription('')
   }
 
-  const handleRemoveSubtask = async (subtaskId: string) => {
-    if (!task) return
+  const updateSubtask = (index: number, updates: { name?: string; description?: string }) => {
+    setLocalSubtasks(prev => 
+      prev.map((subtask, i) => 
+        i === index 
+          ? { ...subtask, ...updates }
+          : subtask
+      )
+    )
+  }
 
-    try {
-      await deleteSubtask(task.id, subtaskId)
-    } catch (error) {
-      console.error('Failed to delete subtask:', error)
-    }
+  const removeSubtask = (index: number) => {
+    setLocalSubtasks(localSubtasks.filter((_, i) => i !== index))
   }
 
   if (!task) return null
+
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -166,19 +185,19 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
             <Label>Subtasks</Label>
             
             {/* Existing subtasks */}
-            {task.subtasks.length > 0 && (
+            {localSubtasks.length > 0 && (
               <div className="space-y-2 mb-4">
-                {task.subtasks.map((subtask) => (
-                  <div key={subtask.id} className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                {localSubtasks.map((subtask, index) => (
+                  <div key={subtask.id || index} className="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex-1 space-y-1">
                       <Input
                         value={subtask.name}
-                        onChange={(e) => handleUpdateSubtask(subtask.id, { name: e.target.value })}
+                        onChange={(e) => updateSubtask(index, { name: e.target.value })}
                         className="font-medium text-sm"
                       />
                       <Textarea
-                        value={subtask.description || ''}
-                        onChange={(e) => handleUpdateSubtask(subtask.id, { description: e.target.value })}
+                        value={subtask.description}
+                        onChange={(e) => updateSubtask(index, { description: e.target.value })}
                         placeholder="Description (optional)"
                         className="text-xs min-h-[50px]"
                       />
@@ -186,7 +205,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveSubtask(subtask.id)}
+                      onClick={() => removeSubtask(index)}
                       className="h-8 w-8 p-0"
                     >
                       <X className="h-4 w-4" />
@@ -215,11 +234,11 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
                 variant="secondary"
                 size="sm"
                 onClick={addSubtask}
-                disabled={!newSubtaskName.trim() || isAddingSubtask}
+                disabled={!newSubtaskName.trim()}
                 className="w-full"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {isAddingSubtask ? 'Adding...' : 'Add Subtask'}
+                Add Subtask
               </Button>
             </div>
           </div>
@@ -229,8 +248,8 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleUpdate} disabled={!title.trim()}>
-            Update Task
+          <Button onClick={handleUpdate} disabled={!title.trim() || isUpdating}>
+            {isUpdating ? 'Updating...' : 'Update Task'}
           </Button>
         </DialogFooter>
       </DialogContent>
