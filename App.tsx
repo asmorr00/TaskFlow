@@ -14,7 +14,6 @@ type AppView = 'landing' | 'auth-signin' | 'auth-signup' | 'app' | 'settings'
 function AppContent() {
   const { user, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<AppView>('landing')
-  const [authError, setAuthError] = useState<string | null>(null)
 
   // Handle email confirmation callback
   useEffect(() => {
@@ -29,9 +28,7 @@ function AppContent() {
         // Clean up the URL
         window.history.replaceState({}, document.title, window.location.pathname)
       } else if (hashParams.get('error')) {
-        // Handle error
-        const errorDescription = hashParams.get('error_description')
-        setAuthError(errorDescription || 'Email confirmation failed')
+        // Handle error - AuthPage will display it
         setCurrentView('auth-signin')
         // Clean up the URL
         window.history.replaceState({}, document.title, window.location.pathname)
@@ -82,10 +79,7 @@ function AppContent() {
     case 'auth-signin':
       return (
         <AuthPage
-          onBackToLanding={() => {
-            setAuthError(null)
-            setCurrentView('landing')
-          }}
+          onBackToLanding={() => setCurrentView('landing')}
           initialMode="signin"
         />
       )
@@ -93,10 +87,7 @@ function AppContent() {
     case 'auth-signup':
       return (
         <AuthPage
-          onBackToLanding={() => {
-            setAuthError(null)
-            setCurrentView('landing')
-          }}
+          onBackToLanding={() => setCurrentView('landing')}
           initialMode="signup"
         />
       )
