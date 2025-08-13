@@ -5,8 +5,9 @@ import { SubtaskItem } from './SubtaskItem'
 import { EditablePriorityBadge } from './EditablePriorityBadge'
 import { EditableStatusBadge } from './EditableStatusBadge'
 import type { Task, Priority, Status, ViewMode } from '@/types/task'
-import { Edit3, Eye, EyeOff, MoreHorizontal, Copy, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Edit3, Eye, EyeOff, MoreHorizontal, Copy, Trash2, ChevronDown, ChevronUp, Calendar } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getDueDateStatus, getDueDateBgColor, formatDueDateShort } from '@/lib/date-utils'
 
 interface TaskTileProps {
   task: Task
@@ -269,8 +270,8 @@ export function TaskTile({
             </div>
           </div>
 
-          {/* Priority and Status badges */}
-          <div className="flex gap-3 flex-wrap" onClick={(e) => e.stopPropagation()}>
+          {/* Priority, Status badges and Due Date */}
+          <div className="flex gap-3 flex-wrap items-center" onClick={(e) => e.stopPropagation()}>
             <EditablePriorityBadge 
               priority={task.priority} 
               onChange={(priority) => onUpdatePriority(task.id, priority)}
@@ -279,6 +280,12 @@ export function TaskTile({
               status={task.status} 
               onChange={(status) => onUpdateStatus(task.id, status)}
             />
+            {task.due_date && (
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getDueDateBgColor(getDueDateStatus(task.due_date))}`}>
+                <Calendar className="w-3 h-3" />
+                {formatDueDateShort(task.due_date)}
+              </div>
+            )}
           </div>
         </div>
 

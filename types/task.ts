@@ -18,6 +18,7 @@ export interface Task {
   subtasks: Subtask[]
   is_focused: boolean
   position: number
+  due_date: string | null
   created_at: string
   updated_at: string
 }
@@ -29,8 +30,9 @@ export interface FilterOptions {
   priority?: Priority | 'all'
   status?: Status | 'all'
   searchTerm?: string
+  dueDate?: 'all' | 'overdue' | 'today' | 'this-week' | 'has-due-date' | 'no-due-date'
 }
 
-export type SortOption = 'created' | 'updated' | 'priority' | 'status' | 'title'
+export type SortOption = 'created' | 'updated' | 'priority' | 'status' | 'title' | 'due-date'
 
 export type ViewMode = 'grid' | 'list'

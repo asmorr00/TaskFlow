@@ -9,6 +9,7 @@ import { Footer } from './Footer'
 import { CreateTaskDialog } from './CreateTaskDialog'
 import { EditTaskDialog } from './EditTaskDialog'
 import type { Task, FilterOptions, SortOption, Priority, Status, ViewMode } from '@/types/task'
+import { getDueDateStatus } from '@/lib/date-utils'
 import type { TaskInsert } from '@/src/types/database'
 import { useTasks } from '../src/hooks/useTasks'
 import { Alert, AlertDescription } from './ui/alert'
@@ -37,7 +38,7 @@ export function TaskGrid({ onOpenSettings }: TaskGridProps = {}) {
     updateSubtask,
     deleteSubtask
   } = useTasks()
-  const [filters, setFilters] = useState<FilterOptions>({ priority: 'all', status: 'all', searchTerm: '' })
+  const [filters, setFilters] = useState<FilterOptions>({ priority: 'all', status: 'all', searchTerm: '', dueDate: 'all' })
   const [sortBy, setSortBy] = useState<SortOption>('created')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [isFocusMode, setIsFocusMode] = useState(false)
@@ -57,7 +58,31 @@ export function TaskGrid({ onOpenSettings }: TaskGridProps = {}) {
       const searchMatch = !filters.searchTerm || 
         task.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         task.description?.toLowerCase().includes(filters.searchTerm.toLowerCase())
-      return priorityMatch && statusMatch && searchMatch
+      
+      // Due date filtering
+      let dueDateMatch = true
+      if (filters.dueDate && filters.dueDate !== 'all') {
+        const dueDateStatus = getDueDateStatus(task.due_date)
+        switch (filters.dueDate) {
+          case 'overdue':
+            dueDateMatch = dueDateStatus === 'overdue'
+            break
+          case 'today':
+            dueDateMatch = dueDateStatus === 'today'
+            break
+          case 'this-week':
+            dueDateMatch = dueDateStatus === 'today' || dueDateStatus === 'tomorrow' || dueDateStatus === 'this-week'
+            break
+          case 'has-due-date':
+            dueDateMatch = task.due_date !== null
+            break
+          case 'no-due-date':
+            dueDateMatch = task.due_date === null
+            break
+        }
+      }
+      
+      return priorityMatch && statusMatch && searchMatch && dueDateMatch
     })
 
     // Only apply sorting if we're not currently dragging AND sortBy is not 'created' (manual order)
@@ -75,6 +100,12 @@ export function TaskGrid({ onOpenSettings }: TaskGridProps = {}) {
             return a.title.localeCompare(b.title)
           case 'updated':
             return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          case 'due-date':
+            // Tasks with no due date go to the end
+            if (!a.due_date && !b.due_date) return 0
+            if (!a.due_date) return 1
+            if (!b.due_date) return -1
+            return new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
           default:
             return 0
         }

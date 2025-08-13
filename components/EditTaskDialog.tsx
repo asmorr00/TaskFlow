@@ -5,7 +5,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, X } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { Plus, X, CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
 import type { Task, Priority, Status } from '@/types/task'
 
 interface EditTaskDialogProps {
@@ -20,6 +23,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
   const [status, setStatus] = useState<Status>('todo')
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
   const [newSubtaskName, setNewSubtaskName] = useState('')
   const [newSubtaskDescription, setNewSubtaskDescription] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
@@ -33,6 +37,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
       setDescription(task.description || '')
       setPriority(task.priority)
       setStatus(task.status)
+      setDueDate(task.due_date ? new Date(task.due_date) : undefined)
       // Initialize local subtasks from task data
       setLocalSubtasks(task.subtasks.map(subtask => ({
         id: subtask.id,
@@ -57,6 +62,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
         description: description.trim(),
         priority,
         status,
+        due_date: dueDate ? dueDate.toISOString() : null,
         subtasks: localSubtasks.map(subtask => ({
           id: subtask.id || '',
           task_id: task.id,
@@ -145,6 +151,43 @@ export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditT
               placeholder="Enter task description"
               className="w-full min-h-[100px]"
             />
+          </div>
+
+          {/* Due Date */}
+          <div className="space-y-2">
+            <Label>Due Date (Optional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start text-left font-normal ${
+                    !dueDate && "text-muted-foreground"
+                  }`}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP") : "Select due date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                />
+                {dueDate && (
+                  <div className="p-3 border-t">
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setDueDate(undefined)}
+                    >
+                      Clear due date
+                    </Button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Priority and Status */}

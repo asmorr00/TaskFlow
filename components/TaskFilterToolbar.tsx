@@ -21,11 +21,11 @@ export function TaskFilterToolbar({
   taskCount,
   totalTasks = taskCount
 }: TaskFilterToolbarProps) {
-  const hasActiveFilters = filters.priority !== 'all' || filters.status !== 'all' || (filters.searchTerm && filters.searchTerm.length > 0)
+  const hasActiveFilters = filters.priority !== 'all' || filters.status !== 'all' || (filters.searchTerm && filters.searchTerm.length > 0) || (filters.dueDate && filters.dueDate !== 'all')
   const isFiltered = taskCount !== totalTasks
 
   const clearFilters = () => {
-    onFiltersChange({ priority: 'all', status: 'all', searchTerm: '' })
+    onFiltersChange({ priority: 'all', status: 'all', searchTerm: '', dueDate: 'all' })
     onSortChange('created')
   }
 
@@ -76,6 +76,20 @@ export function TaskFilterToolbar({
             <option value="done">Done</option>
           </select>
 
+          {/* Due Date Filter */}
+          <select
+            value={filters.dueDate || 'all'}
+            onChange={(e) => onFiltersChange({ ...filters, dueDate: e.target.value as any })}
+            className="px-3 py-1.5 text-xs font-medium bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/50 rounded-md text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="all">All Due Dates</option>
+            <option value="overdue">Overdue</option>
+            <option value="today">Due Today</option>
+            <option value="this-week">Due This Week</option>
+            <option value="has-due-date">Has Due Date</option>
+            <option value="no-due-date">No Due Date</option>
+          </select>
+
           {/* Sort Options */}
           <div className="flex items-center gap-2 border-l border-slate-200/60 dark:border-slate-700/50 pl-4">
             <ArrowUpDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
@@ -90,6 +104,7 @@ export function TaskFilterToolbar({
               <option value="priority">Priority (High to Low)</option>
               <option value="status">Status</option>
               <option value="title">Title (A-Z)</option>
+              <option value="due-date">Due Date (Soonest First)</option>
             </select>
           </div>
         </div>

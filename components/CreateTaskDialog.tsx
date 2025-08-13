@@ -5,7 +5,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, X } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { Plus, X, CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
 import type { Priority, Status } from '@/types/task'
 import type { TaskInsert } from '@/src/types/database'
 
@@ -20,6 +23,7 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<Priority>('medium')
   const [status, setStatus] = useState<Status>('todo')
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
   const [subtasks, setSubtasks] = useState<{ name: string; description: string }[]>([])
   const [newSubtaskName, setNewSubtaskName] = useState('')
   const [newSubtaskDescription, setNewSubtaskDescription] = useState('')
@@ -36,7 +40,8 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
         description: description.trim(),
         priority,
         status,
-        is_focused: true
+        is_focused: true,
+        due_date: dueDate ? dueDate.toISOString() : null
         // position will be auto-calculated by DatabaseService
       }, subtasks)
 
@@ -45,6 +50,7 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
       setDescription('')
       setPriority('medium')
       setStatus('todo')
+      setDueDate(undefined)
       setSubtasks([])
       setNewSubtaskName('')
       setNewSubtaskDescription('')
@@ -104,6 +110,44 @@ export function CreateTaskDialog({ open, onOpenChange, onCreateTask }: CreateTas
               placeholder="Enter task description"
               className="w-full min-h-[100px] bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400"
             />
+          </div>
+
+          {/* Due Date */}
+          <div className="space-y-2">
+            <Label className="text-slate-700 dark:text-slate-300">Due Date (Optional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start text-left font-normal bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 ${
+                    !dueDate && "text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, "PPP") : "Select due date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                  className="bg-white dark:bg-slate-800"
+                />
+                {dueDate && (
+                  <div className="p-3 border-t border-slate-200 dark:border-slate-700">
+                    <Button
+                      variant="ghost"
+                      className="w-full text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      onClick={() => setDueDate(undefined)}
+                    >
+                      Clear due date
+                    </Button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Priority and Status */}

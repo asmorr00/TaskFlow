@@ -34,6 +34,7 @@ export type Database = {
           status: 'todo' | 'in-progress' | 'review' | 'done'
           is_focused: boolean
           position: number
+          due_date: string | null
           created_at: string
           updated_at: string
         }
@@ -46,6 +47,7 @@ export type Database = {
           status?: 'todo' | 'in-progress' | 'review' | 'done'
           is_focused?: boolean
           position?: number
+          due_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -58,6 +60,7 @@ export type Database = {
           status?: 'todo' | 'in-progress' | 'review' | 'done'
           is_focused?: boolean
           position?: number
+          due_date?: string | null
           created_at?: string
           updated_at?: string
         }
