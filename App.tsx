@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { ThemeProvider } from './components/ThemeProvider'
 import { TaskGrid } from './components/TaskGrid'
@@ -14,6 +14,32 @@ type AppView = 'landing' | 'auth-signin' | 'auth-signup' | 'app' | 'settings'
 function AppContent() {
   const { user, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<AppView>('landing')
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  // Handle email confirmation callback
+  useEffect(() => {
+    const handleEmailConfirmation = async () => {
+      // Check if this is an email confirmation callback
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+      const type = hashParams.get('type')
+      
+      if (accessToken && type === 'signup') {
+        // Email confirmed successfully - the AuthProvider will handle the session
+        // Clean up the URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+      } else if (hashParams.get('error')) {
+        // Handle error
+        const errorDescription = hashParams.get('error_description')
+        setAuthError(errorDescription || 'Email confirmation failed')
+        setCurrentView('auth-signin')
+        // Clean up the URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+    }
+
+    handleEmailConfirmation()
+  }, [])
 
   if (loading) {
     return (
@@ -56,7 +82,10 @@ function AppContent() {
     case 'auth-signin':
       return (
         <AuthPage
-          onBackToLanding={() => setCurrentView('landing')}
+          onBackToLanding={() => {
+            setAuthError(null)
+            setCurrentView('landing')
+          }}
           initialMode="signin"
         />
       )
@@ -64,7 +93,10 @@ function AppContent() {
     case 'auth-signup':
       return (
         <AuthPage
-          onBackToLanding={() => setCurrentView('landing')}
+          onBackToLanding={() => {
+            setAuthError(null)
+            setCurrentView('landing')
+          }}
           initialMode="signup"
         />
       )
