@@ -28,15 +28,15 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#0A0A0A] font-[Inter,system-ui,sans-serif]">
+    <div className="light min-h-screen bg-[#F9FAFB] font-[Inter,system-ui,sans-serif]">
       {/* Header */}
-      <header className="border-b border-slate-200/60 dark:border-slate-700/50 bg-white/80 dark:bg-[#1E1E1E]/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-slate-200/60 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+            <span className="text-xl font-semibold text-slate-900 tracking-tight">
               Floatier
             </span>
           </div>
@@ -45,7 +45,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
             <Button
               variant="ghost"
               onClick={onSignIn}
-              className="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+              className="text-slate-700 hover:text-slate-900"
             >
               Sign In
             </Button>
@@ -62,10 +62,10 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-6 py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-semibold text-slate-900 dark:text-slate-100 mb-6 leading-tight tracking-tight">
+          <h1 className="text-5xl md:text-6xl font-semibold text-slate-900 mb-6 leading-tight tracking-tight">
             Organize your work
             <br />
-            <span className="text-blue-600 dark:text-blue-400">and life, today.</span>
+            <span className="text-blue-600">and life, today.</span>
           </h1>
           {/*
           <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed max-w-2xl mx-auto">
@@ -97,10 +97,10 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       {/* Features Grid */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mb-4 tracking-tight">
+          <h2 className="text-3xl font-semibold text-slate-900 mb-4 tracking-tight">
             The modern task management system
           </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Designed to help you stay organized and focused on what matters most. 
           </p>
         </div>
@@ -109,15 +109,15 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-[#1E1E1E] p-6 rounded-lg border border-slate-200/60 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-shadow duration-200"
+              className="bg-white p-6 rounded-lg border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 text-blue-600">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2 tracking-tight">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2 tracking-tight">
                 {feature.title}
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed">
                 {feature.description}
               </p>
             </div>
@@ -148,7 +148,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-6 py-20 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl font-semibold text-slate-900 dark:text-slate-100 mb-8 tracking-tight">
+          <h2 className="text-4xl font-semibold text-slate-900 mb-8 tracking-tight">
             Get Floatier
           </h2>
           {/*<p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
@@ -166,7 +166,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-[#1E1E1E]">
+      <footer className="border-t border-slate-200/60 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-12">
           {/*<div className="grid md:grid-cols-4 gap-8">
             <div>
@@ -211,7 +211,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
           </div>*/}
           
           <div className="text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-600">
               © 2025 Floatier. All rights reserved.
             </p>
           </div>

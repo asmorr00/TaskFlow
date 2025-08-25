@@ -7,13 +7,16 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { LandingPage } from './components/LandingPage'
 import { AuthPage } from './components/AuthPage'
 import { SettingsPage } from './components/SettingsPage'
+import { FloatierSidebar } from './components/FloatierSidebar'
 import { AuthProvider, useAuth } from './src/components/AuthProvider'
 
 type AppView = 'landing' | 'auth-signin' | 'auth-signup' | 'app' | 'settings'
+type AppSection = 'dashboard' | 'tasks' | 'timeline' | 'projects' | 'team' | 'analytics'
 
 function AppContent() {
   const { user, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<AppView>('landing')
+  const [currentSection, setCurrentSection] = useState<AppSection>('tasks')
 
   // Handle email confirmation callback
   useEffect(() => {
@@ -63,7 +66,53 @@ function AppContent() {
       )
     }
     
-    return <TaskGrid onOpenSettings={() => setCurrentView('settings')} />
+    // Show app with sidebar
+    return (
+      <FloatierSidebar
+        currentSection={currentSection}
+        onSectionChange={(section) => {
+          setCurrentSection(section as AppSection)
+          setCurrentView('app')
+        }}
+        onOpenSettings={() => setCurrentView('settings')}
+        onSignOut={async () => {
+          await signOut()
+          setCurrentView('landing')
+        }}
+        defaultOpen={true}
+      >
+        {currentSection === 'tasks' && <TaskGrid />}
+        {currentSection === 'dashboard' && (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-2">Welcome to your dashboard</p>
+          </div>
+        )}
+        {currentSection === 'timeline' && (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900">Timeline</h1>
+            <p className="text-gray-600 mt-2">View your project timeline</p>
+          </div>
+        )}
+        {currentSection === 'projects' && (
+          <div className="p-6">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">Projects</h1>
+          </div>
+        )}
+        {currentSection === 'team' && (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900">Team</h1>
+            <p className="text-gray-600 mt-2">Collaborate with your team</p>
+          </div>
+        )}
+        {currentSection === 'analytics' && (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+            <p className="text-gray-600 mt-2">View project analytics</p>
+          </div>
+        )}
+      </FloatierSidebar>
+    )
   }
 
   // User is not authenticated, show appropriate view

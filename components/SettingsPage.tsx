@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, LogOut, Edit3, Camera, Check, X, User, Shield, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, LogOut, Edit3, Camera, Check, X, User, Shield, Eye, EyeOff, Sun, Monitor, Moon } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 
-import { DarkModeToggle } from './DarkModeToggle'
+
 import { useAuth } from '../src/components/AuthProvider'
+import { useTheme } from './ThemeProvider'
 
 interface SettingsPageProps {
   onBackToApp: () => void
@@ -18,6 +19,7 @@ interface SettingsPageProps {
 
 export function SettingsPage({ onBackToApp, onSignOut }: SettingsPageProps) {
   const { user } = useAuth()
+  const { theme, setTheme } = useTheme()
   const [activeTab, setActiveTab] = useState<'profile' | 'privacy'>('profile')
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
@@ -109,7 +111,7 @@ export function SettingsPage({ onBackToApp, onSignOut }: SettingsPageProps) {
                 "
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to tasks
+                Back to workspace
               </button>
               <div className="w-px h-6 bg-slate-200 dark:bg-slate-700" />
               <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Settings</h1>
@@ -124,7 +126,6 @@ export function SettingsPage({ onBackToApp, onSignOut }: SettingsPageProps) {
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </Button>
-              <DarkModeToggle />
             </div>
           </div>
         </div>
@@ -169,6 +170,7 @@ export function SettingsPage({ onBackToApp, onSignOut }: SettingsPageProps) {
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Tab */}
             {activeTab === 'profile' && (
+            <>
             <Card className="border-slate-200/60 dark:border-slate-700/50 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
                 <div>
@@ -262,6 +264,62 @@ export function SettingsPage({ onBackToApp, onSignOut }: SettingsPageProps) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Appearance Section */}
+            <Card className="border-slate-200/60 dark:border-slate-700/50 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Appearance</CardTitle>
+                <CardDescription>
+                  Choose whether the Console's appearance should be light, dark, or use your computer's settings.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label>Color mode</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Light Mode */}
+                    <button
+                      onClick={() => setTheme('light')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all duration-200 ${
+                        theme === 'light'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800/50'
+                      }`}
+                    >
+                      <Sun className="w-5 h-5" />
+                      <span className="text-sm font-medium">Light</span>
+                    </button>
+
+                    {/* System Mode */}
+                    <button
+                      onClick={() => setTheme('system')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all duration-200 ${
+                        theme === 'system'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800/50'
+                      }`}
+                    >
+                      <Monitor className="w-5 h-5" />
+                      <span className="text-sm font-medium">System</span>
+                    </button>
+
+                    {/* Dark Mode */}
+                    <button
+                      onClick={() => setTheme('dark')}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all duration-200 ${
+                        theme === 'dark'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800/50'
+                      }`}
+                    >
+                      <Moon className="w-5 h-5" />
+                      <span className="text-sm font-medium">Dark</span>
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            </>
             )}
 
             {/* Privacy & Security Tab */}

@@ -124,15 +124,15 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
   }
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#0A0A0A] font-[Inter,system-ui,sans-serif] relative">
+    <div className="light min-h-screen bg-[#F9FAFB] font-[Inter,system-ui,sans-serif] relative">
       {/* Back Button - Top Left */}
       <div className="absolute top-6 left-6 z-10">
         <button
           onClick={onBackToLanding}
           className="
-            inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 
-            hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200
-            px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800
+            inline-flex items-center gap-2 text-sm text-slate-600 
+            hover:text-slate-800 transition-colors duration-200
+            px-3 py-2 rounded-lg hover:bg-slate-100
           "
         >
           <ArrowLeft className="w-4 h-4" />
@@ -149,15 +149,15 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+              <span className="text-xl font-semibold text-slate-900 tracking-tight">
                 Floatier
               </span>
             </div>
             
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2 tracking-tight">
+            <h1 className="text-2xl font-semibold text-slate-900 mb-2 tracking-tight">
               {mode === 'signin' ? 'Welcome back' : 'Create your account'}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-slate-600">
               {mode === 'signin' 
                 ? 'Sign in to your account to continue' 
                 : 'Get started with Floatier today'
@@ -167,25 +167,25 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
 
         {/* Verification Message */}
         {showVerificationMessage ? (
-          <div className="bg-white dark:bg-[#1E1E1E] rounded-lg border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-8">
+          <div className="bg-white rounded-lg border border-slate-200/60 shadow-sm p-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-8 h-8 text-blue-600" />
               </div>
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+              <h2 className="text-xl font-semibold text-slate-900 mb-2">
                 Check your email
               </h2>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                We've sent a confirmation link to <span className="font-medium text-slate-900 dark:text-slate-100">{formData.email}</span>
+              <p className="text-slate-600 mb-6">
+                We've sent a confirmation link to <span className="font-medium text-slate-900">{formData.email}</span>
               </p>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 mb-6">
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="bg-slate-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-slate-600">
                   Please check your inbox and click the verification link to activate your account.
                   The link will expire in 24 hours.
                 </p>
               </div>
               <div className="space-y-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-slate-500">
                   Didn't receive the email? Check your spam folder or
                 </p>
                 <Button
@@ -207,7 +207,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                     }
                   }}
                   disabled={isLoading}
-                  className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="border-slate-200 hover:bg-slate-50"
                 >
                   {isLoading ? 'Resending...' : 'Resend verification email'}
                 </Button>
@@ -217,7 +217,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                     setMode('signin')
                     setFormData({ name: '', email: '', password: '', confirmPassword: '' })
                   }}
-                  className="block w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
+                  className="block w-full text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200"
                 >
                   Back to sign in
                 </button>
@@ -226,16 +226,16 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
           </div>
         ) : (
         /* Auth Card */
-        <div className="bg-white dark:bg-[#1E1E1E] rounded-lg border border-slate-200/60 dark:border-slate-700/50 shadow-sm p-6">
+        <div className="bg-white rounded-lg border border-slate-200/60 shadow-sm p-6">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-slate-900 dark:text-slate-100">
+                <Label htmlFor="name" className="text-slate-900">
                   Full name
                 </Label>
                 <div className="relative">
@@ -246,7 +246,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="pl-10 bg-slate-50 border-slate-200"
                     required
                   />
                 </div>
@@ -254,7 +254,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="email" className="text-slate-900">
                 Email address
               </Label>
               <div className="relative">
@@ -265,14 +265,14 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-10 bg-slate-50 border-slate-200"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-900 dark:text-slate-100">
+              <Label htmlFor="password" className="text-slate-900">
                 Password
               </Label>
               <div className="relative">
@@ -283,13 +283,13 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                   placeholder={mode === 'signin' ? 'Enter your password' : 'Create a password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="pl-10 pr-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-10 pr-10 bg-slate-50 border-slate-200"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -298,7 +298,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
 
             {mode === 'signup' && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-slate-900 dark:text-slate-100">
+                <Label htmlFor="confirmPassword" className="text-slate-900">
                   Confirm password
                 </Label>
                 <div className="relative">
@@ -309,7 +309,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                    className="pl-10 bg-slate-50 border-slate-200"
                     required
                   />
                 </div>
@@ -320,7 +320,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
               <div className="text-right">
                 <button
                   type="button"
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200"
+                  className="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200"
                 >
                   Forgot password?
                 </button>
@@ -349,7 +349,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-[#1E1E1E] text-slate-500 dark:text-slate-400">
+                <span className="px-2 bg-white text-slate-500">
                   Or continue with
                 </span>
               </div>
@@ -363,10 +363,10 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                 disabled={isLoading}
                 className="
                   relative
-                  border-slate-200 dark:border-slate-600 
-                  bg-white dark:bg-slate-800/50
-                  hover:bg-slate-50 dark:hover:bg-slate-700/50
-                  text-slate-700 dark:text-slate-200
+                  border-slate-200 
+                  bg-white 
+                  hover:bg-slate-50 
+                  text-slate-700
                   transition-all duration-200
                 "
               >
@@ -394,7 +394,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                 variant="outline"
                 type="button"
                 disabled={true}
-                className="border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed"
+                className="border-slate-200 opacity-50 cursor-not-allowed"
               >
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.663-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
@@ -405,12 +405,12 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-600">
               {mode === 'signin' ? "Don't have an account? " : "Already have an account? "}
               <button
                 type="button"
                 onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors duration-200"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
               >
                 {mode === 'signin' ? 'Sign up' : 'Sign in'}
               </button>
@@ -421,13 +421,13 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
 
         {/* Terms */}
         {mode === 'signup' && (
-          <p className="mt-6 text-xs text-center text-slate-500 dark:text-slate-400 leading-relaxed">
+          <p className="mt-6 text-xs text-center text-slate-500 leading-relaxed">
             By creating an account, you agree to our{' '}
-            <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+            <a href="#" className="text-blue-600 hover:underline">
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+            <a href="#" className="text-blue-600 hover:underline">
               Privacy Policy
             </a>
             .

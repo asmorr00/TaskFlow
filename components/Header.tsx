@@ -1,28 +1,23 @@
-import { Plus, Focus, Grid3X3, List, User, Settings } from 'lucide-react'
+import { Plus, Focus, Grid3X3, List } from 'lucide-react'
 import type { ViewMode } from '@/types/task'
-import { useAuth } from '../src/components/AuthProvider'
 
 
 interface HeaderProps {
+  title?: string
   isFocusMode: boolean
   onToggleFocusMode: () => void
   viewMode: ViewMode
   onViewModeChange: (mode: ViewMode) => void
   onOpenCreateDialog: () => void
-  onOpenSettings: () => void
 }
 
-export function Header({ isFocusMode, onToggleFocusMode, viewMode, onViewModeChange, onOpenCreateDialog, onOpenSettings }: HeaderProps) {
-  const { user } = useAuth()
-
-  // Get user display name
-  const userDisplayName = user?.user_metadata?.full_name || user?.email || 'User'
+export function Header({ title = "Floatier", isFocusMode, onToggleFocusMode, viewMode, onViewModeChange, onOpenCreateDialog }: HeaderProps) {
 
   return (
     <>
       <header className="w-full mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
-          Floatier
+          {title}
         </h1>
         
         <div className="flex items-center gap-3">
@@ -86,34 +81,7 @@ export function Header({ isFocusMode, onToggleFocusMode, viewMode, onViewModeCha
             Add Task
           </button>
 
-          {/* Spacer */}
-          <div className="w-4"></div>
 
-          {/* Settings Button */}
-          <button
-            onClick={onOpenSettings}
-            className="
-              flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 
-              text-slate-700 dark:text-slate-300 rounded-lg transition-all duration-200 ease-in-out 
-              shadow-sm hover:shadow-md text-sm font-medium tracking-tight
-              border border-slate-200 dark:border-slate-700
-            "
-            title="Settings"
-          >
-            <Settings className="w-4 h-4" />
-            Settings
-          </button>
-
-          {/* User Info */}
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
-            <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">
-              {userDisplayName}
-            </span>
-          </div>
-
-          {/* Spacer */}
-          <div className="w-2"></div>
         </div>
       </header>
     </>

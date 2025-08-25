@@ -16,10 +16,10 @@ import { Alert, AlertDescription } from './ui/alert'
 import { Loader2 } from 'lucide-react'
 
 interface TaskGridProps {
-  onOpenSettings?: () => void
+  // Props can be added here as needed in the future
 }
 
-export function TaskGrid({ onOpenSettings }: TaskGridProps = {}) {
+export function TaskGrid({}: TaskGridProps = {}) {
     const {
     tasks,
     loading, 
@@ -371,12 +371,12 @@ export function TaskGrid({ onOpenSettings }: TaskGridProps = {}) {
             )}
             {/* Header */}
             <Header 
+              title="Tasks"
               isFocusMode={isFocusMode}
               onToggleFocusMode={toggleFocusMode}
               viewMode={viewMode}
               onViewModeChange={handleViewModeChange}
               onOpenCreateDialog={() => setIsCreateDialogOpen(true)}
-              onOpenSettings={onOpenSettings || (() => {})}
             />
 
           {/* Filter Toolbar */}
