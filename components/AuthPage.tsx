@@ -146,7 +146,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-semibold text-slate-900 tracking-tight">
@@ -226,7 +226,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
           </div>
         ) : (
         /* Auth Card */
-        <div className="bg-white rounded-lg border border-slate-200/60 shadow-sm p-6">
+        <div className="bg-white rounded-lg border border-slate-200/60 shadow-sm p-8">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
               <p className="text-sm text-red-600">{error}</p>
@@ -235,7 +235,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-slate-900">
+                <Label htmlFor="name" className="text-slate-700 font-medium">
                   Full name
                 </Label>
                 <div className="relative">
@@ -246,7 +246,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="pl-10 bg-slate-50 border-slate-200"
+                    className="pl-10 h-11 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-md"
                     required
                   />
                 </div>
@@ -254,7 +254,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-900">
+              <Label htmlFor="email" className="text-slate-700 font-medium">
                 Email address
               </Label>
               <div className="relative">
@@ -265,14 +265,14 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="pl-10 bg-slate-50 border-slate-200"
+                  className="pl-10 h-11 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-md"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-900">
+              <Label htmlFor="password" className="text-slate-700 font-medium">
                 Password
               </Label>
               <div className="relative">
@@ -283,7 +283,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                   placeholder={mode === 'signin' ? 'Enter your password' : 'Create a password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="pl-10 pr-10 bg-slate-50 border-slate-200"
+                  className="pl-10 pr-10 h-11 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-md"
                   required
                 />
                 <button
@@ -298,7 +298,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
 
             {mode === 'signup' && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-slate-900">
+                <Label htmlFor="confirmPassword" className="text-slate-700 font-medium">
                   Confirm password
                 </Label>
                 <div className="relative">
@@ -309,7 +309,7 @@ export function AuthPage({ onBackToLanding, initialMode = 'signin' }: AuthPagePr
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className="pl-10 bg-slate-50 border-slate-200"
+                    className="pl-10 h-11 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-md"
                     required
                   />
                 </div>
