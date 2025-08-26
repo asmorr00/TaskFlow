@@ -11,9 +11,9 @@ interface LandingPageProps {
 export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
   const features = [
     {
-      icon: <Grid3X3 className="w-6 h-6" />,
-      title: "Dynamic Grid & List Views",
-      description: "Switch between grid and list layouts to match your workflow. Responsive design adapts to any screen size."
+      icon: <Eye className="w-6 h-6" />,
+      title: "Focus Mode",
+      description: "Eliminate distractions with focus mode. Highlight specific tasks and blur out the rest for better concentration."
     },
     {
       icon: <Zap className="w-6 h-6" />,
@@ -21,9 +21,9 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       description: "Intuitive drag-and-drop reordering. Organize your tasks exactly how you want them with smooth animations."
     },
     {
-      icon: <Eye className="w-6 h-6" />,
-      title: "Focus Mode",
-      description: "Eliminate distractions with focus mode. Highlight specific tasks and blur out the rest for better concentration."
+      icon: <Grid3X3 className="w-6 h-6" />,
+      title: "Dynamic Grid & List Views",
+      description: "Switch between grid and list layouts to match your workflow. Responsive design adapts to any screen size."
     }
   ]
 
@@ -148,18 +148,18 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-6 py-20 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl font-semibold text-slate-900 mb-8 tracking-tight">
-            Get Floatier
+          <h2 className="text-3xl font-semibold text-slate-900 mb-4 tracking-tight">
+            Don't get swept away by your schedule
           </h2>
-          {/*<p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-            Stay organized and focused on what matters most. 
-          </p>*/}
+          <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+            Prioritize and manage your tasks with ease. 
+          </p>
           <Button
             onClick={onGetStarted}
             size="lg"
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg px-8 py-3 text-base"
           >
-            Start free trial
+            Try Floatier
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
